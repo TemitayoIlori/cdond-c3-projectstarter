@@ -227,64 +227,109 @@ jobs:
       - destroy-environment
       # Here's where you will add some code to rollback on failure      
  
-# run-migrations:
-#   docker:
-#     - image: circleci/node:13.8.0
-#     # Docker image here that supports NodeJS
-#   steps:
-#     # Checkout code from git
-#     - run:
-#         name: Run migrations
-#         command: |
+  run-migrations:
+    docker:
+      - image: circleci/node:13.8.0
+      # Docker image here that supports NodeJS
+    steps:
+      # Checkout code from git
+      - checkout
+      - run:
+          name: Run migrations
+          command: |
+            # Your code here
+              cd backend
+              npm install
+              # Run and sve the migration output
+              npm run migrations > migrations_dump.txt
+              #exit 1
+      - run:
+          name: Send migration results to memstash
+          command: |
+            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            then
+              curl -H "Content-Type: text/plain" -H "token: 09828eb7-7e06-49f6-ac8d-788f2521e87a" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+            fi
 #           # Your code here
 #           exit 1
-#     - run:
-#         name: Send migration results to memstash
-#         command: |
-#           # Your code here
-#           exit 1
+      - destroy-environment
 #    # Here's where you will add some code to rollback on failure      
 #
-# deploy-frontend:
-#   docker:
-#     - image: circleci/node:13.8.0
-#     # Docker image here that supports AWS CLI
-#   steps:
-#     # Checkout code from git
-#     - run:
-#         name: Install dependencies
-#         command: |
-#           # your code here
-#     - run:
-#         name: Get backend url
-#         command: |
-#           # your code here
-#           export API_URL="http://${BACKEND_IP}:3030"
-#           echo "${API_URL}"
-#     - run:
-#         name: Deploy frontend objects
-#         command: |
-#           # your code here
-#     # Here's where you will add some code to rollback on failure      
+  deploy-frontend:
+    docker:
+      - image: amazon/aws-cli
+      # Docker image here that supports AWS CLI
+    steps:
+      # Checkout code from git
+      - checkout
+      - attach_workspace:
+          at: .circleci/ansible/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
+            pip install awscli
+            apk add --update npm
+            # your code here
+      - run:
+          name: Get backend url
+          command: |
+            # your code here
+            export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=udacity" --query 'Reservations[*].Instances[*].PublicIpAddress')
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+          cd frontend
+          npm install
+          npm run build
+          tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+          aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+            # your code here
+      # Here's where you will add some code to rollback on failure     
+      - destroy-environment 
 #                   
-# deploy-backend:
-#   docker:
-#     - image: circleci/node:13.8.0
-#     # Docker image here that supports Ansible
-#   steps:
-#     # Checkout code from git
-#     # Add ssh keys with fingerprint
-#     # attach workspace
-#     - run:
-#         name: Install dependencies
-#         command: |
-#           # your code here
-#     - run:
-#         name: Deploy backend
-#         command: |
-#           # your code here
-#     # Here's where you will add some code to rollback on failure  
-#
+  deploy-backend:
+    docker:
+      - image: python:3.7-alpine3.11
+      # Docker image here that supports Ansible
+    steps:
+      # Checkout code from git
+      - checkout
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["23:0d:df:e8:d5:27:f3:de:c8:4d:57:69:3d:41:c8:3f"]
+      # attach workspace
+      - attach_workspace:
+          at: .circleci/ansible/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add tar
+            apk add gzip
+            apk add --update ansible
+            pip install awscli
+            # your code here
+      - run:
+          name: Deploy backend
+          command: |
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
+            # your code here
+      # Here's where you will add some code to rollback on failure  
+      - destroy-environment 
+ 
 # smoke-test:
 #   docker:
 #     - image: circleci/node:13.8.0
