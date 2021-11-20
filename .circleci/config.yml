@@ -24,7 +24,7 @@ commands:
           # Add when this will run
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7})
+            SUCCESS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/migration_<< ${CIRCLE_WORKFLOW_ID:0:7}>>)
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -194,7 +194,6 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
-      - revert-migrations
       # Here's where you will add some code to rollback on failure      
  
   configure-infrastructure:
@@ -227,7 +226,6 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml
             #exit 1
       - destroy-environment
-      - revert-migrations
       # Here's where you will add some code to rollback on failure      
  
   run-migrations:
@@ -257,7 +255,6 @@ jobs:
 #           exit 1
 #    # Here's where you will add some code to rollback on failure  
       - destroy-environment    
-      - revert-migrations
 #
   deploy-frontend:
     docker:
@@ -295,7 +292,6 @@ jobs:
             # your code here
       # Here's where you will add some code to rollback on failure     
       - destroy-environment 
-      - revert-migrations
 #                   
   deploy-backend:
     docker:
@@ -334,7 +330,6 @@ jobs:
             # your code here
       # Here's where you will add some code to rollback on failure  
       - destroy-environment 
-      - revert-migrations
  
   smoke-test:
     docker:
@@ -381,8 +376,7 @@ jobs:
               return 1
             fi
       # Here's where you will add some code to rollback on failure 
-      #- destroy-environment  
-      #- revert-migrations
+      - destroy-environment  
  
 # cloudfront-update:
 #   docker:
