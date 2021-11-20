@@ -188,9 +188,12 @@ jobs:
             --filters 'Name=tag:project,Values=udapeople-backend' \
             --query 'Reservations[*].Instances[0].PublicIpAddress' \
             --output text)
-            echo $BACKEND_IP
             echo "${BACKEND_IP}" >> .circleci/ansible/inventory.txt
             cat .circleci/ansible/inventory.txt
+            #Add to memstash and grab in the smoke test
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
+            --request PUT --data "${BACKEND_IP}" \
+             https://api.memstash.io/values/backendurl
             #exit 1
       - persist_to_workspace:
           root: ./
@@ -352,22 +355,33 @@ jobs:
           name: Get backend url
           command: |
             # your code here
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[0].PublicIpAddress')
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "API_URL = ${API_URL}"
-            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-            cat frontend/.env
+            #export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[0].PublicIpAddress')
+            #export API_URL="http://${BACKEND_IP}:3030"
+            #echo "API_URL = ${API_URL}"
+            #echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            #cat frontend/.env
+            curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
+            --request GET https://api.memstash.io/values/backendurl > backend-url.txt
       - run:
           name: Backend smoke test.
           command: |
             # Fetch and prepare the BACKEND_IP env var
+            #export API_URL="http://${BACKEND_IP}:3030"
+            #echo "${API_URL}"
+            #if curl "${API_URL}/api/status" | grep "ok"
+            #then
+            #    return 0
+            #else
+            #    return 1
+            #fi
+            BACKEND_IP=$(cat backend-url.txt)
             export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
+            echo ${API_URL}
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                return 0
+                exit 0
             else
-                return 1
+                exit 1
             fi
             # your code here
       - run:
