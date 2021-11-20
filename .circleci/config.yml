@@ -185,11 +185,12 @@ jobs:
             # Your code here
             export BACKEND_IP=$(aws ec2 describe-instances \
             --region ${AWS_DEFAULT_REGION} \
-            --filters "Name=tag:project,Values=udapeople-backend" \
+            --filters 'Name=tag:project,Values=udapeople-backend' \
             --query 'Reservations[*].Instances[0].PublicIpAddress' \
             --output text)
-            echo "${BACKEND_IP}" >> ./.circleci/ansible/inventory.txt
-            cat ./.circleci/ansible/inventory.txt
+            echo $BACKEND_IP
+            echo "${BACKEND_IP}" >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
             #exit 1
       - persist_to_workspace:
           root: ./
@@ -351,7 +352,7 @@ jobs:
           name: Get backend url
           command: |
             # your code here
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress')
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[0].PublicIpAddress')
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
