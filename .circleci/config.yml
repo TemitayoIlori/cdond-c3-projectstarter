@@ -262,8 +262,6 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
-      - attach_workspace:
-          at: .circleci/ansible/
       - run:
           name: Install dependencies
           command: |
@@ -272,7 +270,9 @@ jobs:
             apk add --update ansible
             pip install awscli
             apk add --update npm
-            # your code here
+            # your code here      
+      - attach_workspace:
+          at: .circleci/ansible/
       - run:
           name: Get backend url
           command: |
