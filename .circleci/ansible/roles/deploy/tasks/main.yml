@@ -24,10 +24,10 @@
 #  file:
 #    path: /home/ubuntu/backend
 #    state: directory
-- name: unpack backend files
-  become: yes
-  shell: |
-    pwd
+#- name: unpack backend files
+#  become: yes
+#  shell: |
+#    pwd
 
 - name: create backend directory
   become: yes
