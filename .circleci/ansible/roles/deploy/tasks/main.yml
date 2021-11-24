@@ -27,7 +27,7 @@
 - name: unpack backend files
   become: yes
   shell: |
-  pwd
+    pwd
 
 - name: create backend directory
   become: yes
