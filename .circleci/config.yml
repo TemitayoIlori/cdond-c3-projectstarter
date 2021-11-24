@@ -303,7 +303,7 @@ jobs:
 #                   
   deploy-backend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: circleci/node:13.8.0
       # Docker image here that supports Ansible
     steps:
       # Checkout code from git
@@ -313,14 +313,18 @@ jobs:
           fingerprints: ["23:0d:df:e8:d5:27:f3:de:c8:4d:57:69:3d:41:c8:3f"]
       # attach workspace
       - attach_workspace:
-          at: .circleci/ansible/
+          at: ~/
       - run:
           name: Install dependencies
           command: |
-            apk add tar
-            apk add gzip
-            apk add --update ansible nodejs npm gzip curl tar
-            pip install awscli
+            sudo apt update
+            sudo apt upgrade -y
+            sudo apt install -y ansible
+            sudo apt install -y awscli
+            #apk add tar
+            #apk add gzip
+            #apk add --update ansible nodejs npm gzip curl tar
+            #pip install awscli
             # your code here
       - run:
           name: Deploy backend
