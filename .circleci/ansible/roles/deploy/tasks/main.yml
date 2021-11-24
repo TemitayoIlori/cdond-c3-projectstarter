@@ -20,17 +20,21 @@
 #    production: yes
 #    state: present
 
-- name: "Make backend dir"
-  file:
-    path: /home/ubuntu/backend
-    state: directory
-
-#- name: create backend directory
-#  become: yes
+#- name: "Make backend dir"
 #  file:
-#    path: ~/backend
+#    path: /home/ubuntu/backend
 #    state: directory
-#    mode: 0755
+- name: unpack backend files
+  become: yes
+  shell: |
+  pwd
+
+- name: create backend directory
+  become: yes
+  file:
+    path: ~/backend
+    state: directory
+    mode: 0755
 
 - name: copy backend files
   become: yes
