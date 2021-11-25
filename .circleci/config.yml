@@ -330,7 +330,6 @@ jobs:
           name: Deploy backend
           command: |
             cd backend
-            ls -al
             npm i
             npm run build
             cp package* ./dist
@@ -409,7 +408,7 @@ jobs:
               return 1
             fi
       # Here's where you will add some code to rollback on failure 
-      - destroy-environment  
+      #- destroy-environment  
  
 # cloudfront-update:
 #   docker:
