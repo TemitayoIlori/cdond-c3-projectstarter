@@ -424,7 +424,7 @@ jobs:
             yum install -y curl
             # your code here
       - run:
-          name: Update cloudfront distribution
+          name: Get OldWorkflowID
           command: |
             OldWorkflowID=$(aws cloudformation \
               list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
@@ -432,7 +432,9 @@ jobs:
             echo OldWorkflowID: $OldWorkflowID
             #echo $OldWorkflowID >> ~/OldWorkflowID.txt
             #cat ~/OldWorkflowID.txt
-            
+      - run:
+          name: Update cloudfront distribution
+          command: |      
             aws cloudformation deploy \
             --template-file .circleci/files/cloudfront.yml \
             --stack-name "InitialStack-${OldWorkflowID}" \
