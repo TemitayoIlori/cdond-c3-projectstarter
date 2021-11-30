@@ -451,7 +451,7 @@ jobs:
  
   cleanup:
     docker:
-      - image: circleci/node:13.8.0
+      - image: amazon/aws-cli
       # Docker image here
     steps:
       # Checkout code from git
