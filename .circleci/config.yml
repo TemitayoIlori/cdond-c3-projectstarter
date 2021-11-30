@@ -440,7 +440,7 @@ jobs:
             --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
             --tags project=udapeople
 
-            echo OldWorkflowID: $OldWorkflowID
+            #echo OldWorkflowID: $OldWorkflowID
             echo Current Workdlow ID:"${CIRCLE_WORKFLOW_ID:0:7}"
             # your code here
       # Here's where you will add some code to rollback on failure  
