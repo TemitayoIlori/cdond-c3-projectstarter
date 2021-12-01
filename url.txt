@@ -1,0 +1,7 @@
+Github profile
+
+https://github.com/TemitayoIlori/cdond-c3-projectstarter
+
+Bucket
+
+http://udapeople-ae37aa3.s3-website-us-east-1.amazonaws.com
