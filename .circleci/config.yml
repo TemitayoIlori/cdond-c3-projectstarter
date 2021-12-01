@@ -482,6 +482,7 @@ jobs:
             echo Stack names: "${STACKS[@]}" 
             curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/OldWorkflowID >> ~/OldWorkflowID.txt
             echo OldWorkflowID: $(cat ~/OldWorkflowID.txt)
+            OldWorkflowID= $(cat ~/OldWorkflowID.txt)
 
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
